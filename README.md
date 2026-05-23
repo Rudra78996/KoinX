@@ -13,6 +13,7 @@ A high-performance, robust cryptocurrency **Transaction Reconciliation Engine** 
 6. [Docker & Containerized Setup](#docker--containerized-setup)
 7. [Running Tests](#running-tests)
 8. [Ingestion & Reconciliation Logic Case Study](#ingestion--reconciliation-logic-case-study)
+9. [Testing the Deployed Instance](#testing-the-deployed-instance)
 
 ---
 
@@ -203,3 +204,30 @@ When you upload the provided messy sample files, the engine demonstrates its rob
 5.  **Invalid Formats**:
     `USR-018` contains malformed timestamp `2024-03-09T`, and `USR-019` contains negative quantity `-0.1`.
     *   *Engine action:* Ingested as `INVALID` with detailed descriptions and added as an ingestion audit trail.
+
+---
+
+## Testing the Deployed Instance
+
+For quick evaluation and testing without local installation, this Transaction Reconciliation Engine is live and deployed on a VPS:
+
+*   **Live Base URL:** `http://195.35.23.33:3002/`
+*   **Live Health Check:** `http://195.35.23.33:3002/health`
+
+### Live Testing with `curl`
+
+To trigger a live reconciliation run on the hosted instance using the provided CSV files, run the following command in your terminal from the project directory:
+
+```bash
+curl -X POST http://195.35.23.33:3002/api/reconcile \
+  -F "user_transactions=@user_transactions.csv" \
+  -F "exchange_transactions=@exchange_transactions.csv"
+```
+
+This returns a JSON response containing a unique `runId` and the matching statistics (e.g., matched, conflicting, unmatched, and ingestion error counts).
+
+To download the complete, side-by-side reconciliation report in CSV format from the live deployment, use the returned `runId` in the following command:
+
+```bash
+curl -o report.csv "http://195.35.23.33:3002/api/report/<runId>?format=csv"
+```
